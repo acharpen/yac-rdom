@@ -1,7 +1,18 @@
-import { State } from './state';
+import { Computation, State } from './state';
 
-function createState<T>(object: T): State<T> {
-  return new State(object);
+function createComputation<T>(states: State<unknown>[], func: () => T): Computation<T> {
+  const computation = new Computation(func);
+
+  states.forEach((state) => state.addComputation(computation));
+
+  return computation;
 }
 
-export { createState };
+function createState<T>(val: T): State<T> {
+  return new State(val);
+}
+
+export const R = {
+  on: createComputation,
+  state: createState
+};

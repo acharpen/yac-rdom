@@ -1,7 +1,7 @@
-import { State } from './state';
+import { Computation, State } from './state';
 
-type ElementAttrs = Record<string, string | State<string>>;
-type ElementChildNode = (() => HTMLElement) | number | string | State<number> | State<string>;
+type ElementAttrs = Record<string, boolean | number | string | State<boolean | number | string>>;
+type ElementChildNode = (() => HTMLElement) | number | string | Computation<number | string> | State<number | string>;
 type ElementParams = [ElementAttrs, ...ElementChildNode[]] | [...ElementChildNode[]];
 
 function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): void {
@@ -26,13 +26,13 @@ function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): voi
 
 function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
   for (const [key, val] of Object.entries(attrs)) {
-    if (typeof val === 'string') {
-      elt.setAttribute(key, val);
+    if (typeof val === 'boolean' || typeof val === 'number' || typeof val === 'string') {
+      elt.setAttribute(key, val.toString());
     } else {
-      elt.setAttribute(key, val.get());
+      elt.setAttribute(key, val.get().toString());
 
       val.addEffect(() => {
-        elt.setAttribute(key, val.get());
+        elt.setAttribute(key, val.get().toString());
       });
     }
   }
@@ -49,6 +49,7 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
       typeof params[0] === 'function' ||
       typeof params[0] === 'number' ||
       typeof params[0] === 'string' ||
+      params[0] instanceof Computation ||
       params[0] instanceof State
     ) {
       attrs = {};

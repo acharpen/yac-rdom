@@ -1,24 +1,61 @@
-export class State<T> {
+class AbstractState {
   private readonly effects: (() => void)[];
 
-  private target: T;
-
-  public constructor(target: T) {
+  public constructor() {
     this.effects = [];
-    this.target = target;
   }
 
   public addEffect(effect: () => void): void {
     this.effects.push(effect);
   }
 
-  public get(): T {
-    return this.target;
+  public runEffects(): void {
+    this.effects.forEach((effect) => effect());
+  }
+}
+
+export class Computation<T> extends AbstractState {
+  private readonly func: () => T;
+
+  public constructor(func: () => T) {
+    super();
+
+    this.func = func;
   }
 
-  public set(target: T): void {
-    this.target = target;
+  public get(): T {
+    return this.func();
+  }
+}
 
-    this.effects.forEach((effect) => effect());
+export class State<T> extends AbstractState {
+  private readonly computations: Computation<unknown>[];
+  private readonly eq?: (a: T, b: T) => boolean;
+
+  private value: T;
+
+  public constructor(value: T, eq?: (a: T, b: T) => boolean) {
+    super();
+
+    this.computations = [];
+    this.eq = eq;
+    this.value = value;
+  }
+
+  public addComputation(computation: Computation<unknown>): void {
+    this.computations.push(computation);
+  }
+
+  public get(): T {
+    return this.value;
+  }
+
+  public set(value: T): void {
+    this.value = value;
+
+    if (!this.eq || this.eq(value, this.value)) {
+      this.computations.forEach((computation) => computation.runEffects());
+      this.runEffects();
+    }
   }
 }
