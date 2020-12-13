@@ -3,16 +3,15 @@
 
 import '@testing-library/jest-dom/extend-expect';
 import { h, render } from '../h';
-import { createState } from '../r';
+import { R } from '../r';
 import { getByTestId } from '@testing-library/dom';
 
 // ////////////////////////////////////////////////////////////////////////////
 // Setup
 // ////////////////////////////////////////////////////////////////////////////
 
-const counter = createState(73);
-
-const counterClass = createState('bold');
+const counter = R.state(73);
+const counterClass = R.state('bold');
 
 render(h('div', { class: counterClass, 'data-testid': 'counter', style: 'font-weight: 600' }, counter), document.body);
 
