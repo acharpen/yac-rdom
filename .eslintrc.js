@@ -28,7 +28,6 @@ module.exports = {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     'grouped-accessor-pairs': ['error'],
     'guard-for-in': ['error'],
-    'max-classes-per-file': ['error', 1],
     'no-alert': ['error'],
     'no-await-in-loop': ['error'],
     'no-caller': ['error'],
@@ -165,6 +164,10 @@ module.exports = {
       'error',
       {
         selector: 'default',
+        filter: {
+          regex: '[A-Z]',
+          match: false
+        },
         format: ['camelCase'],
         trailingUnderscore: 'forbid'
       },
