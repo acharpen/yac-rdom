@@ -1,7 +1,14 @@
 import { Computation, State } from './state';
 
-type ElementAttrs = Record<string, boolean | number | string | State<boolean | number | string>>;
-type ElementChildNode = (() => HTMLElement) | number | string | Computation<number | string> | State<number | string>;
+type ElementAttrs = Record<string, boolean | number | string | State<boolean> | State<number> | State<string>>;
+type ElementChildNode =
+  | (() => HTMLElement)
+  | number
+  | string
+  | Computation<number>
+  | Computation<string>
+  | State<number>
+  | State<string>;
 type ElementParams = [ElementAttrs, ...ElementChildNode[]] | [...ElementChildNode[]];
 
 function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): void {
