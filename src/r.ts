@@ -1,6 +1,6 @@
 import { Computation, State } from './state';
 
-function createComputation<T>(states: State<unknown>[], func: () => T): Computation<T> {
+function createComputation<T>(states: State<any>[], func: () => T): Computation<T> {
   const computation = new Computation(func);
 
   states.forEach((state) => state.addComputation(computation));
