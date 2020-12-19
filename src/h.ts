@@ -1,6 +1,17 @@
 import { Computation, State } from './state';
 
-type ElementAttrs = Record<string, boolean | number | string | State<boolean> | State<number> | State<string>>;
+type ElementAttrs = Record<
+  string,
+  | boolean
+  | number
+  | string
+  | Computation<boolean>
+  | Computation<number>
+  | Computation<string>
+  | State<boolean>
+  | State<number>
+  | State<string>
+>;
 type ElementChildNode =
   | (() => HTMLElement)
   | number
