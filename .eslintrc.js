@@ -201,6 +201,7 @@ module.exports = {
     '@typescript-eslint/no-dupe-class-members': ['error'],
     '@typescript-eslint/no-duplicate-imports': ['error'],
     '@typescript-eslint/no-dynamic-delete': ['error'],
+    '@typescript-eslint/no-explicit-any': ['off'],
     '@typescript-eslint/no-extraneous-class': ['error', { allowStaticOnly: true }],
     '@typescript-eslint/no-implicit-any-catch': ['error'],
     '@typescript-eslint/no-invalid-this': ['error'],
