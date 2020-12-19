@@ -1,0 +1,17 @@
+.card {
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 8px;
+  width: fit-content;
+}
+
+.card > div:first-child {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 8px;
+}
+
+.card .initials {
+  margin-left: 8px;
+}
