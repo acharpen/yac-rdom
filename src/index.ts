@@ -1,2 +1,2 @@
 export { h, render } from './h';
-export { createState } from './r';
+export { R } from './r';
