@@ -11,6 +11,7 @@ type ElementAttrs = Record<
   | State<boolean>
   | State<number>
   | State<string>
+  | ((event: Event) => void)
 >;
 type ElementChildNode =
   | (() => HTMLElement)
@@ -44,7 +45,9 @@ function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): voi
 
 function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
   for (const [key, val] of Object.entries(attrs)) {
-    if (typeof val === 'boolean' || typeof val === 'number' || typeof val === 'string') {
+    if (typeof val === 'function') {
+      elt.addEventListener(key, val);
+    } else if (typeof val === 'boolean' || typeof val === 'number' || typeof val === 'string') {
       elt.setAttribute(key, val.toString());
     } else {
       elt.setAttribute(key, val.get().toString());
