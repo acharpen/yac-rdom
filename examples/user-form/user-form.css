@@ -1,17 +1,17 @@
-.card {
+.user {
   border: 1px solid #000;
   border-radius: 4px;
+  display: inline-block;
   padding: 8px;
-  width: fit-content;
 }
 
-.card > div:first-child {
+.user > div:first-child {
   align-items: center;
   display: flex;
   flex-direction: row;
   margin-bottom: 8px;
 }
 
-.card .initials {
+.user .initials {
   margin-left: 8px;
 }
