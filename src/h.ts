@@ -13,48 +13,47 @@ type ElementAttrs = Record<
   | State<string>
   | ((event: Event) => void)
 >;
-type ElementChildNode =
+type ElementValue =
   | (() => HTMLElement)
   | number
   | string
   | Derivation<number>
   | Derivation<string>
   | State<number>
-  | State<string>
-  | State<any[]>;
-type ElementParams = [ElementAttrs, ...ElementChildNode[]] | [...ElementChildNode[]];
+  | State<string>;
+type ElementParams = [ElementAttrs, ...ElementValue[]] | [...ElementValue[]];
 
-function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): void {
-  for (let i = 0, len = childNodes.length; i < len; i++) {
-    const childNode = childNodes[i];
+function appendValues(values: ElementValue[], elt: HTMLElement): void {
+  for (let i = 0, len = values.length; i < len; i++) {
+    const value = values[i];
 
-    if (typeof childNode === 'function') {
-      elt.appendChild(childNode());
-    } else if (typeof childNode === 'number' || typeof childNode === 'string') {
-      elt.appendChild(document.createTextNode(childNode.toString()));
+    if (typeof value === 'function') {
+      elt.appendChild(value());
+    } else if (typeof value === 'number' || typeof value === 'string') {
+      elt.appendChild(document.createTextNode(value.toString()));
     } else {
-      const textNode = document.createTextNode(childNode.get().toString());
+      const textNode = document.createTextNode(value.get().toString());
 
       elt.appendChild(textNode);
 
-      childNode.addEffect(() => {
-        textNode.nodeValue = childNode.get().toString();
+      value.addEffect(() => {
+        textNode.nodeValue = value.get().toString();
       });
     }
   }
 }
 
 function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
-  for (const [key, val] of Object.entries(attrs)) {
-    if (typeof val === 'function') {
-      elt.addEventListener(key, val);
-    } else if (typeof val === 'boolean' || typeof val === 'number' || typeof val === 'string') {
-      elt.setAttribute(key, val.toString());
+  for (const [key, value] of Object.entries(attrs)) {
+    if (typeof value === 'function') {
+      elt.addEventListener(key, value);
+    } else if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
+      elt.setAttribute(key, value.toString());
     } else {
-      elt.setAttribute(key, val.get().toString());
+      elt.setAttribute(key, value.get().toString());
 
-      val.addEffect(() => {
-        elt.setAttribute(key, val.get().toString());
+      value.addEffect(() => {
+        elt.setAttribute(key, value.get().toString());
       });
     }
   }
@@ -63,10 +62,10 @@ function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
 function h(tag: string, ...params: ElementParams): () => HTMLElement {
   return (): HTMLElement => {
     let attrs: ElementAttrs;
-    let childNodes: ElementChildNode[];
+    let values: ElementValue[];
     if (!params.length) {
       attrs = {};
-      childNodes = [];
+      values = [];
     } else if (
       typeof params[0] === 'function' ||
       typeof params[0] === 'number' ||
@@ -75,26 +74,22 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
       params[0] instanceof State
     ) {
       attrs = {};
-      childNodes = params as ElementChildNode[];
+      values = params as ElementValue[];
     } else {
       attrs = params[0];
-      childNodes = params.slice(1) as ElementChildNode[];
+      values = params.slice(1) as ElementValue[];
     }
 
     const elt = document.createElement(tag);
-    appendChildNodes(childNodes, elt);
+    appendValues(values, elt);
     setAttributes(attrs, elt);
 
     return elt;
   };
 }
 
-function hFor<T>(list: State<T>[], map: (item: State<T>) => () => HTMLElement): (() => HTMLElement)[] {
-  return list.map((item) => map(item));
-}
-
 function render(factory: () => HTMLElement, container: HTMLElement): void {
   container.appendChild(factory());
 }
 
-export { h, hFor, render };
+export { h, render };

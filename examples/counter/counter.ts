@@ -3,7 +3,7 @@ import { h } from '../../src/h';
 
 export const Counter = () => {
   const counter = R.state(0);
-  const counterClass = R.on([counter], () => (counter.get() % 2 === 0 ? 'even' : 'odd'));
+  const counterClass = R.on([counter], () => (counter.get() % 2 === 0 ? 'even' : 'odd') as string);
 
   setInterval(() => {
     counter.set(counter.get() + 1);

@@ -1,7 +1,7 @@
 import { Derivation, State } from './state';
 
 function createDerivation<T>(states: State<any>[], func: () => T): Derivation<T> {
-  const derivation = new Derivation(func);
+  const derivation = new Derivation<T>(func);
 
   states.forEach((state) => state.addDerivation(derivation));
 
@@ -9,7 +9,7 @@ function createDerivation<T>(states: State<any>[], func: () => T): Derivation<T>
 }
 
 function createState<T>(val: T): State<T> {
-  return new State(val);
+  return new State<T>(val);
 }
 
 export const R = {

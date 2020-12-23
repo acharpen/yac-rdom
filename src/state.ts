@@ -29,7 +29,7 @@ class Derivation<T> extends AbstractState {
 }
 
 class State<T> extends AbstractState {
-  private readonly derivations: Derivation<unknown>[];
+  private readonly derivations: Derivation<any>[];
   private readonly eq?: (a: T, b: T) => boolean;
 
   private value: T;
@@ -42,7 +42,7 @@ class State<T> extends AbstractState {
     this.value = value;
   }
 
-  public addDerivation(derivation: Derivation<unknown>): void {
+  public addDerivation(derivation: Derivation<any>): void {
     this.derivations.push(derivation);
   }
 
@@ -51,19 +51,13 @@ class State<T> extends AbstractState {
   }
 
   public set(value: T): void {
-    this.value = value;
-
     if (!this.eq || this.eq(value, this.value)) {
+      this.value = value;
+
       this.derivations.forEach((derivation) => derivation.runEffects());
       this.runEffects();
     }
   }
 }
 
-class StateArray<T> extends State<T> {
-  public constructor(value: T, eq?: (a: T, b: T) => boolean) {
-    super(value, eq);
-  }
-}
-
-export { Derivation, State, StateArray };
+export { Derivation, State };
