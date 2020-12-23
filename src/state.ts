@@ -14,7 +14,7 @@ class AbstractState {
   }
 }
 
-export class Computation<T> extends AbstractState {
+class Derivation<T> extends AbstractState {
   private readonly func: () => T;
 
   public constructor(func: () => T) {
@@ -28,8 +28,8 @@ export class Computation<T> extends AbstractState {
   }
 }
 
-export class State<T> extends AbstractState {
-  private readonly computations: Computation<unknown>[];
+class State<T> extends AbstractState {
+  private readonly derivations: Derivation<unknown>[];
   private readonly eq?: (a: T, b: T) => boolean;
 
   private value: T;
@@ -37,13 +37,13 @@ export class State<T> extends AbstractState {
   public constructor(value: T, eq?: (a: T, b: T) => boolean) {
     super();
 
-    this.computations = [];
+    this.derivations = [];
     this.eq = eq;
     this.value = value;
   }
 
-  public addComputation(computation: Computation<unknown>): void {
-    this.computations.push(computation);
+  public addDerivation(derivation: Derivation<unknown>): void {
+    this.derivations.push(derivation);
   }
 
   public get(): T {
@@ -54,8 +54,16 @@ export class State<T> extends AbstractState {
     this.value = value;
 
     if (!this.eq || this.eq(value, this.value)) {
-      this.computations.forEach((computation) => computation.runEffects());
+      this.derivations.forEach((derivation) => derivation.runEffects());
       this.runEffects();
     }
   }
 }
+
+class StateArray<T> extends State<T> {
+  public constructor(value: T, eq?: (a: T, b: T) => boolean) {
+    super(value, eq);
+  }
+}
+
+export { Derivation, State, StateArray };

@@ -1,13 +1,13 @@
-import { Computation, State } from './state';
+import { Derivation, State } from './state';
 
 type ElementAttrs = Record<
   string,
   | boolean
   | number
   | string
-  | Computation<boolean>
-  | Computation<number>
-  | Computation<string>
+  | Derivation<boolean>
+  | Derivation<number>
+  | Derivation<string>
   | State<boolean>
   | State<number>
   | State<string>
@@ -17,10 +17,11 @@ type ElementChildNode =
   | (() => HTMLElement)
   | number
   | string
-  | Computation<number>
-  | Computation<string>
+  | Derivation<number>
+  | Derivation<string>
   | State<number>
-  | State<string>;
+  | State<string>
+  | State<any[]>;
 type ElementParams = [ElementAttrs, ...ElementChildNode[]] | [...ElementChildNode[]];
 
 function appendChildNodes(childNodes: ElementChildNode[], elt: HTMLElement): void {
@@ -70,7 +71,7 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
       typeof params[0] === 'function' ||
       typeof params[0] === 'number' ||
       typeof params[0] === 'string' ||
-      params[0] instanceof Computation ||
+      params[0] instanceof Derivation ||
       params[0] instanceof State
     ) {
       attrs = {};
@@ -88,8 +89,12 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
   };
 }
 
+function hFor<T>(list: State<T>[], map: (item: State<T>) => () => HTMLElement): (() => HTMLElement)[] {
+  return list.map((item) => map(item));
+}
+
 function render(factory: () => HTMLElement, container: HTMLElement): void {
   container.appendChild(factory());
 }
 
-export { h, render };
+export { h, hFor, render };

@@ -1,11 +1,11 @@
-import { Computation, State } from './state';
+import { Derivation, State } from './state';
 
-function createComputation<T>(states: State<any>[], func: () => T): Computation<T> {
-  const computation = new Computation(func);
+function createDerivation<T>(states: State<any>[], func: () => T): Derivation<T> {
+  const derivation = new Derivation(func);
 
-  states.forEach((state) => state.addComputation(computation));
+  states.forEach((state) => state.addDerivation(derivation));
 
-  return computation;
+  return derivation;
 }
 
 function createState<T>(val: T): State<T> {
@@ -13,6 +13,6 @@ function createState<T>(val: T): State<T> {
 }
 
 export const R = {
-  on: createComputation,
+  on: createDerivation,
   state: createState
 };
