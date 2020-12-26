@@ -1,4 +1,4 @@
-import { Derivation, State } from './state';
+import { Derivation, State, StateArray } from './state';
 
 type ElementAttrs = Record<
   string,
@@ -20,14 +20,28 @@ type ElementValue =
   | Derivation<number>
   | Derivation<string>
   | State<number>
-  | State<string>;
+  | State<string>
+  | [StateArray<any>, (state: State<any>) => () => HTMLElement];
 type ElementParams = [ElementAttrs, ...ElementValue[]] | [...ElementValue[]];
 
 function appendValues(values: ElementValue[], elt: HTMLElement): void {
   for (let i = 0, len = values.length; i < len; i++) {
     const value = values[i];
 
-    if (typeof value === 'function') {
+    if (Array.isArray(value)) {
+      const [items, gen] = value;
+
+      items.get().forEach((item) => elt.appendChild(gen(item)()));
+
+      items.addEffectOnAdd((idx, item) => {
+        if (idx >= items.get().length) {
+          elt.appendChild(gen(item)());
+        } else {
+          elt.insertBefore(gen(item)(), elt.childNodes[idx]);
+        }
+      });
+      items.addEffectOnRemove((idx) => elt.removeChild(elt.children[idx]));
+    } else if (typeof value === 'function') {
       elt.appendChild(value());
     } else if (typeof value === 'number' || typeof value === 'string') {
       elt.appendChild(document.createTextNode(value.toString()));
@@ -36,9 +50,7 @@ function appendValues(values: ElementValue[], elt: HTMLElement): void {
 
       elt.appendChild(textNode);
 
-      value.addEffect(() => {
-        textNode.nodeValue = value.get().toString();
-      });
+      value.addEffect(() => (textNode.nodeValue = value.get().toString()));
     }
   }
 }
@@ -50,11 +62,15 @@ function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
     } else if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
       elt.setAttribute(key, value.toString());
     } else {
-      elt.setAttribute(key, value.get().toString());
+      if (elt instanceof HTMLInputElement || elt instanceof HTMLSelectElement || elt instanceof HTMLTextAreaElement) {
+        elt.value = value.get().toString();
 
-      value.addEffect(() => {
+        value.addEffect(() => (elt.value = value.get().toString()));
+      } else {
         elt.setAttribute(key, value.get().toString());
-      });
+
+        value.addEffect(() => elt.setAttribute(key, value.get().toString()));
+      }
     }
   }
 }
@@ -67,6 +83,7 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
       attrs = {};
       values = [];
     } else if (
+      Array.isArray(params[0]) ||
       typeof params[0] === 'function' ||
       typeof params[0] === 'number' ||
       typeof params[0] === 'string' ||
@@ -88,8 +105,8 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
   };
 }
 
-function render(factory: () => HTMLElement, container: HTMLElement): void {
-  container.appendChild(factory());
+function render(container: HTMLElement, ...gens: [...(() => HTMLElement)[]]): void {
+  gens.map((gen) => container.appendChild(gen()));
 }
 
 export { h, render };

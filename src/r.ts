@@ -1,4 +1,4 @@
-import { Derivation, State } from './state';
+import { Derivation, State, StateArray } from './state';
 
 function createDerivation<T>(states: State<any>[], func: () => T): Derivation<T> {
   const derivation = new Derivation<T>(func);
@@ -12,7 +12,12 @@ function createState<T>(val: T): State<T> {
   return new State<T>(val);
 }
 
+function createStateArray<T>(val: State<T>[]): StateArray<T> {
+  return new StateArray<T>(val);
+}
+
 export const R = {
   on: createDerivation,
-  state: createState
+  state: createState,
+  stateArray: createStateArray
 };

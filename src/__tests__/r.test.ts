@@ -13,7 +13,7 @@ import { getByTestId } from '@testing-library/dom';
 const counter = R.state(73);
 const counterClass = R.state('bold');
 
-render(h('div', { class: counterClass, 'data-testid': 'counter', style: 'font-weight: 600' }, counter), document.body);
+render(document.body, h('div', { class: counterClass, 'data-testid': 'counter', style: 'font-weight: 600' }, counter));
 
 // ////////////////////////////////////////////////////////////////////////////
 // Tests
