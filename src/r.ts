@@ -8,12 +8,12 @@ function createDerivation<T>(states: State<any>[], func: () => T): Derivation<T>
   return derivation;
 }
 
-function createState<T>(val: T): State<T> {
-  return new State<T>(val);
+function createState<T>(val: T, eq?: (value: T) => (othValue: T) => boolean): State<T> {
+  return new State<T>(val, eq);
 }
 
-function createStateArray<T>(val: T[]): StateArray<T> {
-  return new StateArray<T>(val);
+function createStateArray<T>(val: T[], eq?: (item: T, othItem: T) => boolean): StateArray<T> {
+  return new StateArray<T>(val, eq);
 }
 
 export const R = {
