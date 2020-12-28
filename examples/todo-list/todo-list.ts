@@ -5,7 +5,10 @@ import { Todo } from './todo';
 
 export const TodoList = () => {
   const nextTodoTitle = R.state('');
-  const todoList = R.stateArray([]);
+  const todoList = R.stateArray<State<{ title: string }>>(
+    [],
+    (todo, othTodo) => todo.get().title === othTodo.get().title
+  );
 
   const handleAddTodo = () => {
     todoList.add(R.state({ title: nextTodoTitle.get() }));
