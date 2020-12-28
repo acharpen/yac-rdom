@@ -12,7 +12,7 @@ function createState<T>(val: T): State<T> {
   return new State<T>(val);
 }
 
-function createStateArray<T>(val: State<T>[]): StateArray<T> {
+function createStateArray<T>(val: T[]): StateArray<T> {
   return new StateArray<T>(val);
 }
 

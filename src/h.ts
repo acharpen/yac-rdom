@@ -15,36 +15,35 @@ type ElementAttrs = Record<
 >;
 type ElementValue =
   | (() => HTMLElement)
+  | [StateArray<any>, (state: State<any>) => () => HTMLElement]
   | number
   | string
   | Derivation<number>
   | Derivation<string>
   | State<number>
-  | State<string>
-  | [StateArray<any>, (state: State<any>) => () => HTMLElement];
-type ElementParams = [ElementAttrs, ...ElementValue[]] | [...ElementValue[]];
+  | State<string>;
 
 function appendValues(values: ElementValue[], elt: HTMLElement): void {
   for (let i = 0, len = values.length; i < len; i++) {
     const value = values[i];
 
-    if (Array.isArray(value)) {
-      const [items, gen] = value;
-
-      items.get().forEach((item) => elt.appendChild(gen(item)()));
-
-      items.addEffectOnAdd((idx, item) => {
-        if (idx >= items.get().length) {
-          elt.appendChild(gen(item)());
-        } else {
-          elt.insertBefore(gen(item)(), elt.childNodes[idx]);
-        }
-      });
-      items.addEffectOnRemove((idx) => elt.removeChild(elt.children[idx]));
-    } else if (typeof value === 'function') {
+    if (typeof value === 'function') {
       elt.appendChild(value());
     } else if (typeof value === 'number' || typeof value === 'string') {
       elt.appendChild(document.createTextNode(value.toString()));
+    } else if (Array.isArray(value)) {
+      const [items, func] = value;
+
+      items.get().forEach((item) => elt.appendChild(func(item)()));
+
+      items.addEffectOnAdd((idx, item) => {
+        if (idx >= items.get().length) {
+          elt.appendChild(func(item)());
+        } else {
+          elt.insertBefore(func(item)(), elt.childNodes[idx]);
+        }
+      });
+      items.addEffectOnRemove((idx) => elt.removeChild(elt.children[idx]));
     } else {
       const textNode = document.createTextNode(value.get().toString());
 
@@ -75,7 +74,7 @@ function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
   }
 }
 
-function h(tag: string, ...params: ElementParams): () => HTMLElement {
+function h(tag: string, ...params: [ElementAttrs, ...ElementValue[]] | [...ElementValue[]]): () => HTMLElement {
   return (): HTMLElement => {
     let attrs: ElementAttrs;
     let values: ElementValue[];
@@ -83,10 +82,10 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
       attrs = {};
       values = [];
     } else if (
-      Array.isArray(params[0]) ||
       typeof params[0] === 'function' ||
       typeof params[0] === 'number' ||
       typeof params[0] === 'string' ||
+      Array.isArray(params[0]) ||
       params[0] instanceof Derivation ||
       params[0] instanceof State
     ) {
@@ -105,8 +104,8 @@ function h(tag: string, ...params: ElementParams): () => HTMLElement {
   };
 }
 
-function render(container: HTMLElement, ...gens: [...(() => HTMLElement)[]]): void {
-  gens.map((gen) => container.appendChild(gen()));
+function render(container: HTMLElement, ...funcs: [...(() => HTMLElement)[]]): void {
+  funcs.map((func) => container.appendChild(func()));
 }
 
 export { h, render };
