@@ -36,20 +36,20 @@ function appendValues(values: ElementValue[], elt: HTMLElement): void {
 
       items.get().forEach((item) => elt.appendChild(func(item)()));
 
-      items.addEffectOnAdd((idx, item) => {
+      items.effectsOnAdd.push((idx, item) => {
         if (idx >= items.get().length) {
           elt.appendChild(func(item)());
         } else {
           elt.insertBefore(func(item)(), elt.childNodes[idx]);
         }
       });
-      items.addEffectOnRemove((idx) => elt.removeChild(elt.children[idx]));
+      items.effectsOnRemove.push((idx) => elt.removeChild(elt.children[idx]));
     } else {
       const textNode = document.createTextNode(value.get().toString());
 
       elt.appendChild(textNode);
 
-      value.addEffect(() => (textNode.nodeValue = value.get().toString()));
+      value.effects.push(() => (textNode.nodeValue = value.get().toString()));
     }
   }
 }
@@ -64,11 +64,11 @@ function setAttributes(attrs: ElementAttrs, elt: HTMLElement): void {
       if (elt instanceof HTMLInputElement || elt instanceof HTMLSelectElement || elt instanceof HTMLTextAreaElement) {
         elt.value = value.get().toString();
 
-        value.addEffect(() => (elt.value = value.get().toString()));
+        value.effects.push(() => (elt.value = value.get().toString()));
       } else {
         elt.setAttribute(key, value.get().toString());
 
-        value.addEffect(() => elt.setAttribute(key, value.get().toString()));
+        value.effects.push(() => elt.setAttribute(key, value.get().toString()));
       }
     }
   }

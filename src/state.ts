@@ -1,5 +1,6 @@
 class Derivation<T> {
-  private readonly effects: (() => void)[];
+  public readonly effects: (() => void)[];
+
   private readonly func: () => T;
 
   public constructor(func: () => T) {
@@ -7,16 +8,8 @@ class Derivation<T> {
     this.func = func;
   }
 
-  public addEffect(effect: () => void): void {
-    this.effects.push(effect);
-  }
-
   public get(): T {
     return this.func();
-  }
-
-  public runEffects(): void {
-    this.effects.forEach((effect) => effect());
   }
 }
 
@@ -40,7 +33,8 @@ class AbstractState<T> {
 }
 
 class State<T> extends AbstractState<T> {
-  private readonly effects: (() => void)[];
+  public readonly effects: (() => void)[];
+
   private readonly eq: ((othValue: T) => boolean) | undefined;
 
   public constructor(value: T, eq?: (value: T) => (othValue: T) => boolean) {
@@ -48,10 +42,6 @@ class State<T> extends AbstractState<T> {
 
     this.effects = [];
     this.eq = eq?.(this.value);
-  }
-
-  public addEffect(effect: () => void): void {
-    this.effects.push(effect);
   }
 
   public isEqual(othState: State<T>): boolean {
@@ -65,14 +55,15 @@ class State<T> extends AbstractState<T> {
 
     if (!this.eq || !this.eq(oldValue)) {
       this.effects.forEach((effect) => effect());
-      this.derivations.forEach((derivation) => derivation.runEffects());
+      this.derivations.forEach((derivation) => derivation.effects.forEach((effect) => effect()));
     }
   }
 }
 
 class StateArray<T> extends AbstractState<T[]> {
-  private readonly effectsOnAdd: ((idx: number, item: T) => void)[];
-  private readonly effectsOnRemove: ((idx: number) => void)[];
+  public readonly effectsOnAdd: ((idx: number, item: T) => void)[];
+  public readonly effectsOnRemove: ((idx: number) => void)[];
+
   private readonly eq: ((item: T, othItem: T) => boolean) | undefined;
 
   public constructor(value: T[], eq?: (item: T, othItem: T) => boolean) {
@@ -87,15 +78,7 @@ class StateArray<T> extends AbstractState<T[]> {
     this.value.push(itemToAdd);
 
     this.effectsOnAdd.forEach((effect) => effect(itemToAddIdx ?? this.value.length, itemToAdd));
-    this.derivations.forEach((derivation) => derivation.runEffects());
-  }
-
-  public addEffectOnAdd(effect: (idx: number, item: T) => void): void {
-    this.effectsOnAdd.push(effect);
-  }
-
-  public addEffectOnRemove(effect: (idx: number) => void): void {
-    this.effectsOnRemove.push(effect);
+    this.derivations.forEach((derivation) => derivation.effects.forEach((effect) => effect()));
   }
 
   public remove(itemToRemove: T): void {
@@ -105,7 +88,7 @@ class StateArray<T> extends AbstractState<T[]> {
     this.value.splice(itemToRemoveIdx, 1);
 
     this.effectsOnRemove.forEach((effect) => effect(itemToRemoveIdx));
-    this.derivations.forEach((derivation) => derivation.runEffects());
+    this.derivations.forEach((derivation) => derivation.effects.forEach((effect) => effect()));
   }
 }
 
